@@ -25,11 +25,7 @@ public class Exercise_2 {
     private static class VProg extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
-            if (message == Integer.MAX_VALUE) {             // superstep 0
-                return 0;
-            } else {                                        // superstep > 0
-                return message;
-            }
+            return message;
         }
     }
 
@@ -46,8 +42,7 @@ public class Exercise_2 {
             } else {
                 // otherwise propagate the message
                 // the message will be source shortest path plus the cost of edge between source and destination
-                Integer message =  sourceVertex._2+edgeCost;
-                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(), message)).iterator()).asScala();
+                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(), sourceVertex._2+edgeCost)).iterator()).asScala();
             }
 
         }
@@ -96,10 +91,8 @@ public class Exercise_2 {
 
         GraphOps ops = new GraphOps(G, scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
 
-        ops.pregel(Integer.MAX_VALUE,
-                //0,
-                //Integer.MAX_VALUE,
-                10,
+        ops.pregel(0,
+                Integer.MAX_VALUE,
                 EdgeDirection.Out(),
                 new VProg(),
                 new sendMsg(),

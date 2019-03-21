@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.graphx.*;
-import org.apache.spark.sql.SQLContext;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.collection.Iterator;
@@ -26,21 +25,38 @@ public class Exercise_2 {
     private static class VProg extends AbstractFunction3<Long,Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Long vertexID, Integer vertexValue, Integer message) {
-            return null;
+            if (message == Integer.MAX_VALUE) {             // superstep 0
+                return 0;
+            } else {                                        // superstep > 0
+                return message;
+            }
         }
     }
 
     private static class sendMsg extends AbstractFunction1<EdgeTriplet<Integer,Integer>, Iterator<Tuple2<Object,Integer>>> implements Serializable {
         @Override
         public Iterator<Tuple2<Object, Integer>> apply(EdgeTriplet<Integer, Integer> triplet) {
-            return null;
+            Tuple2<Object,Integer> sourceVertex = triplet.toTuple()._1();
+            Tuple2<Object,Integer> dstVertex = triplet.toTuple()._2();
+
+            Integer edgeCost = triplet.toTuple()._3();
+            if (sourceVertex._2 > dstVertex._2) {   // if source shortest path is greater than destination shortest path
+                // do nothing
+                return JavaConverters.asScalaIteratorConverter(new ArrayList<Tuple2<Object,Integer>>().iterator()).asScala();
+            } else {
+                // otherwise propagate the message
+                // the message will be source shortest path plus the cost of edge between source and destination
+                Integer message =  sourceVertex._2+edgeCost;
+                return JavaConverters.asScalaIteratorConverter(Arrays.asList(new Tuple2<Object,Integer>(triplet.dstId(), message)).iterator()).asScala();
+            }
+
         }
     }
 
     private static class merge extends AbstractFunction2<Integer,Integer,Integer> implements Serializable {
         @Override
         public Integer apply(Integer o, Integer o2) {
-            return null;
+            return Math.min(o,o2);
         }
     }
 
@@ -81,7 +97,9 @@ public class Exercise_2 {
         GraphOps ops = new GraphOps(G, scala.reflect.ClassTag$.MODULE$.apply(Integer.class),scala.reflect.ClassTag$.MODULE$.apply(Integer.class));
 
         ops.pregel(Integer.MAX_VALUE,
-                Integer.MAX_VALUE,
+                //0,
+                //Integer.MAX_VALUE,
+                10,
                 EdgeDirection.Out(),
                 new VProg(),
                 new sendMsg(),
@@ -94,5 +112,5 @@ public class Exercise_2 {
                 System.out.println("Minimum cost to get from "+labels.get(1l)+" to "+labels.get(vertex._1)+" is "+vertex._2);
             });
 	}
-	
+
 }

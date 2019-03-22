@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Exercise_3 {
 
@@ -78,7 +79,7 @@ public class Exercise_3 {
                 .build();
         //here
         List<Tuple2<Object,VertexPayload>> vertices = Lists.newArrayList(
-                new Tuple2<>(1l, new VertexPayload(0,new ArrayList<>(Arrays.asList( new Long[] {1l})))),
+                new Tuple2<>(1l, new VertexPayload(Integer.MAX_VALUE,new ArrayList<>(Arrays.asList( new Long[] {1l})))),
                 new Tuple2<>(2l, new VertexPayload(Integer.MAX_VALUE,new ArrayList<>())),
                 new Tuple2<>(3l, new VertexPayload(Integer.MAX_VALUE,new ArrayList<>())),
                 new Tuple2<>(4l, new VertexPayload(Integer.MAX_VALUE,new ArrayList<>())),
@@ -118,8 +119,11 @@ public class Exercise_3 {
                     Tuple2<Object,VertexPayload> vertex = (Tuple2<Object, VertexPayload>)v;
                     VertexPayload message = vertex._2;
                     ArrayList<Long> mShortestPathInLong = message.path;
-//                    ArrayList<String> mShortestPathString = mShortestPathInLong.forEach(x -> labels[x]);
-                    System.out.println("Minimum cost to get from "+labels.get(1l)+" to "+labels.get(vertex._1)+" is "+message.value+" via "+mShortestPathInLong);
+                    ArrayList<String> mShortestPathString = new ArrayList<>();
+                    for(Long path:mShortestPathInLong){
+                        mShortestPathString.add(labels.get(path));
+                    }
+                    System.out.println("Minimum cost to get from "+labels.get(1l)+" to "+labels.get(vertex._1)+" is "+message.value+" via "+mShortestPathString);
                 });
     }
 

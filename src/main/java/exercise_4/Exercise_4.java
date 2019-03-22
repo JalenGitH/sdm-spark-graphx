@@ -4,6 +4,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.functions;
 import org.apache.spark.sql.RowFactory;
 import org.apache.spark.sql.SQLContext;
 import org.apache.spark.sql.types.DataTypes;
@@ -11,13 +12,10 @@ import org.apache.spark.sql.types.MetadataBuilder;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.graphframes.GraphFrame;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -59,10 +57,12 @@ public class Exercise_4 {
 
 			GraphFrame wikiGraph = GraphFrame.apply(wikiVertices, wikiEdges);
 
-			System.out.println(wikiGraph);
+//			wikiGraph.edges().show();
+//			wikiGraph.vertices().show();
 
-			wikiGraph.edges().show();
-			wikiGraph.vertices().show();
+			GraphFrame mPageRank = wikiGraph.pageRank().resetProbability(0.15).maxIter(10).run();
+			Dataset<Row> pageRankNodes =  mPageRank.vertices().orderBy(functions.desc("pagerank"));
+			pageRankNodes.show(10);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 		}
